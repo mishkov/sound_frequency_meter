@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.github.mishkov:kiss-fft-jni:0.0.10'
+    implementation 'com.github.mishkov:kiss-fft-jni:1.0.0'
     implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
