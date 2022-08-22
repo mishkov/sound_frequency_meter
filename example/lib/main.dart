@@ -1,49 +1,40 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:sound_frequency_meter/sound_frequency_meter.dart';
+import 'package:sound_frequency_meter/sound_frequency_meter_configuration.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const TunerApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+class TunerApp extends StatefulWidget {
+  const TunerApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<TunerApp> createState() => _TunerAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  final _soundFrequencyMeterPlugin = SoundFrequencyMeter();
+class _TunerAppState extends State<TunerApp> {
+  final _soundFrequencyMeter = SoundFrequencyMeter(
+    const SoundFrequencyMeterConfiguration(),
+  );
+
+  double _frequency = 0.0;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    intFrequencyListener();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await _soundFrequencyMeterPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
+  void intFrequencyListener() {
+    _soundFrequencyMeter.addFrequencyListener((frequency) {
+      if (frequency == null) return;
+      if (!mounted) return;
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
+      setState(() {
+        _frequency = frequency;
+      });
     });
   }
 
@@ -52,10 +43,23 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Tuner'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('$_frequency Hz'),
+              const SizedBox(height: 30),
+              const Text(
+                'Take your 🎸 and tune it!!!',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
