@@ -16,7 +16,9 @@ class TunerApp extends StatefulWidget {
 
 class _TunerAppState extends State<TunerApp> {
   final _soundFrequencyMeter = SoundFrequencyMeter(
-    const SoundFrequencyMeterConfiguration(),
+    const SoundFrequencyMeterConfiguration(
+      readsNumber: 30720,
+    ),
   );
 
   double _frequency = 0.0;
