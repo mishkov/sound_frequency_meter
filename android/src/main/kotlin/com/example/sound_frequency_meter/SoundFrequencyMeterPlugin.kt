@@ -1,7 +1,6 @@
 package com.example.sound_frequency_meter
 
 import android.content.Context
-import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.NonNull
