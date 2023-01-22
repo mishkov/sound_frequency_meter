@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import 'package:sound_frequency_meter/sound_frequency_meter.dart';
-import 'package:sound_frequency_meter/sound_frequency_meter_configuration.dart';
 
 void main() {
   runApp(const TunerApp());
@@ -18,11 +17,7 @@ class TunerApp extends StatefulWidget {
 }
 
 class _TunerAppState extends State<TunerApp> {
-  final _soundFrequencyMeter = SoundFrequencyMeter(
-    const SoundFrequencyMeterConfiguration(
-      readsNumber: 2048,
-    ),
-  );
+  final _soundFrequencyMeter = SoundFrequencyMeter();
 
   Float64List _data = Float64List(0);
   final _lastData = List<num>.filled(8, 0.0);
@@ -101,7 +96,7 @@ class DataPainter extends CustomPainter {
         value = math.max(lastData.elementAt(i) - 0.5, 0);
       }
 
-     //value = math.max(value, 1.0);
+      //value = math.max(value, 1.0);
 
       lastData[i] = value.toDouble();
 
