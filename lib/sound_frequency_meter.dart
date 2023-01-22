@@ -5,6 +5,8 @@
 // platforms in the `pubspec.yaml` at
 // https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
 
+import 'dart:typed_data';
+
 import 'package:permission_handler/permission_handler.dart';
 
 import 'sound_frequency_meter_configuration.dart';
@@ -22,7 +24,7 @@ class SoundFrequencyMeter {
     },
   );
 
-  void addFrequencyListener(void Function(double? frequency) listener) async {
+  void addFrequencyListener(void Function(Float64List? data) listener) async {
     _futureIsMicrophonePermissionGranted.then(
       (isGranted) {
         if (isGranted) {

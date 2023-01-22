@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:sound_frequency_meter/sound_frequency_meter_configuration.dart';
@@ -16,12 +18,12 @@ class MethodChannelSoundFrequencyMeter extends SoundFrequencyMeterPlatform {
 
   @override
   void listenForFrequency(
-    void Function(double? frequency) listener, {
+    void Function(Float64List? data) listener, {
     SoundFrequencyMeterConfiguration config =
         const SoundFrequencyMeterConfiguration(),
   }) {
     void safeListener(event) {
-      if (event is double?) {
+      if (event is Float64List?) {
         listener(event);
       }
     }

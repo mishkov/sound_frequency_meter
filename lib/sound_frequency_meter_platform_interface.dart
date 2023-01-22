@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:sound_frequency_meter/sound_frequency_meter_configuration.dart';
 
@@ -27,7 +29,7 @@ abstract class SoundFrequencyMeterPlatform extends PlatformInterface {
 
   /// Adds listener that consumes sound frequency
   void listenForFrequency(
-    void Function(double? frequency) listener, {
+    void Function(Float64List? data) listener, {
     SoundFrequencyMeterConfiguration config =
         const SoundFrequencyMeterConfiguration(),
   }) {
