@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:math' as math;
 
+import 'package:async/async.dart';
 import 'package:mic_stream/mic_stream.dart';
 import 'package:sound_frequency_meter/range_equal.dart';
 
@@ -28,6 +30,9 @@ class SoundFrequencyMeter {
   List<double> _nsdfFrequencies = [];
   List<double> _autocorrelationFrequencies = [];
 
+  SendPort? _sendPort;
+  StreamQueue? _frequenciesFromIsolate;
+
   SoundFrequencyMeter({
     this.sampleRate = 44100,
     this.frequenciesBufferSize = 100,
@@ -41,6 +46,8 @@ class SoundFrequencyMeter {
     });
 
     _initMicrophoneFuture = _initMicrophoneStream();
+
+    _initIsolate();
   }
 
   Future<void> _initMicrophoneStream() async {
@@ -52,11 +59,40 @@ class SoundFrequencyMeter {
     _microphoneListener = _microphoneStream!.listen(_processAudio);
   }
 
+  Future<void> _initIsolate() async {
+    final p = ReceivePort();
+    await Isolate.spawn(_processAudioConcurrently, p.sendPort);
+
+    _frequenciesFromIsolate = StreamQueue<dynamic>(p);
+
+    _sendPort = await _frequenciesFromIsolate!.next;
+  }
+
   void dispose() {
+    _sendPort?.send(null);
+    _frequenciesFromIsolate?.cancel();
+
     _initMicrophoneFuture?.whenComplete(() {
       _microphoneListener?.cancel();
     });
     _microphoneListener?.cancel();
+  }
+
+  void _processAudioConcurrently(SendPort sendPort) async {
+    final commandPort = ReceivePort();
+    sendPort.send(commandPort.sendPort);
+
+    await for (final message in commandPort) {
+      if (message is List<int>) {
+        final frequency = _calculateFrequency(message, sampleRate);
+
+        sendPort.send(frequency);
+      } else if (message == null) {
+        break;
+      }
+    }
+
+    Isolate.exit();
   }
 
   double _calculateFrequency(List<int> samples, int sampleRate) {
@@ -197,15 +233,22 @@ class SoundFrequencyMeter {
     if (_isAudioProcessing) {
       return;
     }
+    if (_sendPort == null) {
+      return;
+    }
+    if (_frequenciesFromIsolate == null) {
+      return;
+    }
 
     _isAudioProcessing = true;
 
-    final result = _calculateFrequency(
-      samples,
-      sampleRate,
-    );
+    _sendPort!.send(samples);
 
-    _frequencyStreamController.add(result);
-    _isAudioProcessing = false;
+    _frequenciesFromIsolate!.next.then((frequency) {
+      if (frequency is double) {
+        _frequencyStreamController.add(frequency);
+      }
+      _isAudioProcessing = false;
+    });
   }
 }
